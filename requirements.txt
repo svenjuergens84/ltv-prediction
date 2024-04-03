@@ -2,5 +2,5 @@ streamlit
 numpy
 pandas
 datetime
-scipy.optimize
+scipy
 matplotlib
