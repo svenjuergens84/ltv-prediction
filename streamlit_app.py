@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 25 14:59:46 2024
-
-@author: Sven
-"""
-
-
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -13,19 +5,6 @@ from datetime import date
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
-
-
-#https://docs.streamlit.io/library/api-reference/widgets
-
-#the terminal must know the folder --> run it in spyder first with F5
-#run via Spyder Terminal: !python -m streamlit run Streamlit_Test.py
-#stop it via CTRL + C (when terminal is selected)
-
-
-#Local URL: http://localhost:8501
-#Network URL: http://192.168.178.42:8501
-
-
 
 
 st.title("📈 LTV Prediction")
@@ -93,35 +72,15 @@ with col2:
 st.header("Predicted Day in the future")
 end_day = st.number_input('Type in the end day for your prediction, e.g. 30, 60, 360', min_value = 0, max_value = 360, value = 90)
 
-
-
 today = str(date.today()) #prepare the "today" variable with the US formatted date --> for writing it into the file name
-
-#arpdau = 0.1 # the ARPDAU in USD, e.g. 0.3 = 30 Cents
-#end_day = 360 # provide the end day for your calculations. 360 is a good starting point
-#cpi = 1 # the CPI in USD, e.g. 0.5 = 50 Cents
-
-#x = [1, 7, 30] #days, e.g. 1, 7, 14, 30
-#y = [0.40, 0.20, 0.07] #the corresponding retention rates as percentage, e.g. 0.30, 0.10
 
 x = [1, 7, 30] #days, e.g. 1, 7, 14, 30
 y = [float(day_1_retention)/100,
      float(day_7_retention)/100,
      float(day_30_retention)/100]
 
- #the corresponding retention rates as percentage, e.g. 0.30, 0.10
-
-
-#ROAS = (Revenue / Spending) * 100
-#defines the ROAS goal that a marketing campaign should reach.
-#e.g. a ROAS of 200 means that the LTV is 2 times the CPI (LTV: 2$ vs. CPI: 1$)
-#e.g. a ROAS of 50 means that the LTV is 50% of the CPI (LTV: 0.5$ vs. CPI: 1$)
-#roas = 120  
 
 currency = "$"
-
-
-
 
 def PrintCurrentSettings(arpdau, cpi, roas, x_values, y_values):
     print("CURRENT SETTINGS:")
@@ -300,18 +259,11 @@ def ShowLTVCPIPlot(ltv_num, cpi_num, ltv_dict_obj, cpi_recoup_obj):
 
 
 PrintCurrentSettings(arpdau, cpi, roas, x, y)
-
 ltv_end_day_float = GetLTV(arpdau, end_day, x, y)
 ShowPlot(x, y, ltv_end_day_float, arpdau)
-
 standard_ltv_dict = GetStandardDayLTV(arpdau, x, y)
 detailed_ltv_dict = GetDetailedDayLTV(arpdau, x, y, end_day)
-
-
 lifetime_days_float = GetLifetimeDays(end_day, x, y)
-
 cpi_recoup_day = FindRecoupCPIDay(arpdau, cpi, roas, end_day, x, y)
-
-
 ShowLTVCPIPlot(ltv_end_day_float, cpi, detailed_ltv_dict, cpi_recoup_day)
 
