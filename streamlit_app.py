@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Mar 25 14:59:46 2024
+
+@author: Sven
+"""
+
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -6,45 +14,91 @@ import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
+
+#https://docs.streamlit.io/library/api-reference/widgets
+
+#the terminal must know the folder --> run it in spyder first with F5
+#run via Spyder Terminal: !python -m streamlit run Streamlit_Test.py
+#stop it via CTRL + C (when terminal is selected)
+
+
+#Local URL: http://localhost:8501
+#Network URL: http://192.168.178.42:8501
+
+
+
+
 st.title("📈 LTV Prediction")
+
+st.markdown('''
+    **This dashboard will help you to figure out your users' Lifetime Value.**
+    
+    Just type in some numbers that you most likely got from your Google Play Store or Apple App Store.
+    
+    **How it works:**
+    
+    - the program tries to find a curve for the given points of your retention rate
+    - please be gentle as there is no sanity check right now :)
+    - e.g. your day 30 retention shouldn't be greater than your day 1 retention, etc.
+    - then the program calculates many different scenarios and tries to find a point in time to satisfy your ROAS goal
+    - e.g. ROAS goal of 120% would mean that you spend 1 USD and get back 1.20 USD
+    - if the Break-Even Day variable is 0, that means that the algorithm couldn't find a point where you are running ROI positive with the given numbers  
+    - this program is right now in an early version, so don't spend your entire marketing budget on these values :)
+    - let me know if you have found a bug or have some feature requests ;)
+    
+    Made by Sven Jürgens
+    
+    https://www.linkedin.com/in/svenjuergens/  
+    http://svenjuergens-consulting.com/
+    
+    ''')
+
 col1, col2 = st.columns([1, 1])
-
-
 
 with col1:
     st.header("Retention Rates")
 
-    day_1_retention = st.text_input('Type in your Day 1 retention %', '30.5')
-    st.write('day_1_retention: ', float(day_1_retention))
+    #day_1_retention = st.text_input('Type in your Day 1 retention %', '30.5')
+    day_1_retention = st.number_input('Type in your Day 1 retention %', min_value = 0.0, max_value = 100.0, value = 30.5)
+    #st.write('Day 1 Retention %: ', float(day_1_retention))
     
-    day_7_retention = st.text_input('Type in your Day 7 retention %', '10.1')
-    st.write('day_7_retention: ', float(day_7_retention))
+    #day_7_retention = st.text_input('Type in your Day 7 retention %', '10.1')
+    day_7_retention = st.number_input('Type in your Day 7 retention %', min_value = 0.0, max_value = 100.0, value = 10.5)
+    #st.write('Day 7 Retention %: ', float(day_7_retention))
     
-    day_30_retention = st.text_input('Type in your Day 30 retention %', '2.4')
-    st.write('day_30_retention: ', float(day_30_retention))
+    #day_30_retention = st.text_input('Type in your Day 30 retention %', '2.4')
+    day_30_retention = st.number_input('Type in your Day 30 retention %', min_value = 0.0, max_value = 100.0, value = 3.5)
+    #st.write('Day 30 Retention %: ', float(day_30_retention))
 
 
 with col2:
     st.header("ARPDAU, CPI, ROAS")
     
-    arpdau = st.text_input('Type in your ARPDAU USD', '2.34')
+    #arpdau = st.text_input('Type in your ARPDAU USD', '2.34')
+    arpdau = st.number_input('Type in your ARPDAU USD', min_value = 0.0, max_value = 100.0, value = 0.5)
     arpdau = float(arpdau)
-    st.write('ARPDAU: ', arpdau)
+    #st.write('ARPDAU $: ', arpdau)
     
-    cpi = st.text_input('Type in your CPI USD', '4.89')
+    #cpi = st.text_input('Type in your CPI USD', '4.89')
+    cpi = st.number_input('Type in your CPI USD', min_value = 0.0, max_value = 100.0, value = 1.0)
     cpi = float(cpi)
-    st.write('CPI: ', cpi)
+    #st.write('CPI $: ', cpi)
     
-    roas = st.text_input('Type in your ROAS goal %', '120')
+    #roas = st.text_input('Type in your ROAS goal %', '120')
+    roas = st.number_input('Type in your ROAS goal %', min_value = 0.0, max_value = 500.0, value = 120.0)
     roas = int(roas)
-    st.write('ROAS % Goal: ', roas)
+    #st.write('ROAS % Goal: ', roas)
+
+
+st.header("Predicted Day in the future")
+end_day = st.number_input('Type in the end day for your prediction, e.g. 30, 60, 360', min_value = 0, max_value = 360, value = 90)
 
 
 
 today = str(date.today()) #prepare the "today" variable with the US formatted date --> for writing it into the file name
 
 #arpdau = 0.1 # the ARPDAU in USD, e.g. 0.3 = 30 Cents
-end_day = 360 # provide the end day for your calculations. 360 is a good starting point
+#end_day = 360 # provide the end day for your calculations. 360 is a good starting point
 #cpi = 1 # the CPI in USD, e.g. 0.5 = 50 Cents
 
 #x = [1, 7, 30] #days, e.g. 1, 7, 14, 30
@@ -260,3 +314,4 @@ cpi_recoup_day = FindRecoupCPIDay(arpdau, cpi, roas, end_day, x, y)
 
 
 ShowLTVCPIPlot(ltv_end_day_float, cpi, detailed_ltv_dict, cpi_recoup_day)
+
