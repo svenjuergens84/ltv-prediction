@@ -7,10 +7,11 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 
-st.title("📈 LTV Prediction")
+st.title("📈 LTV Prediction v0.2")
 
 st.markdown('''
-    **This dashboard will help you to figure out your users' Lifetime Value.**
+    **This dashboard will help you to figure out your users' Lifetime Value.**  
+    last update: 2024-04-11
     
     Just type in some numbers that you most likely got from your Google Play Store or Apple App Store.
     
