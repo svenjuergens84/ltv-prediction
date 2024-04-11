@@ -250,7 +250,7 @@ def ShowLTVCPIPlot(ltv_num, cpi_num, ltv_dict_obj, cpi_recoup_obj):
                      fontsize=8)
     
     plt.title("LTV(Day "+ str(end_day)+"): " + str(ltv_num) + " " + currency)
-    plt.suptitle("CPI: " + str(round(cpi_num, 4)) + " " + currency + " - " + "Breakeven Day: " + str(round(cpi_recoup_obj, 4)))
+    plt.suptitle("CPI: " + str(round(cpi_num, 4)) + " " + currency + " - " + "Breakeven Day (ROAS): " + str(round(cpi_recoup_obj, 4)))
     plt.xlabel('x Days') #name the x axis of the plot
     plt.ylabel('y USD') #name the y axis of the plot
     plt.legend() #add a legend to the plot
@@ -259,7 +259,7 @@ def ShowLTVCPIPlot(ltv_num, cpi_num, ltv_dict_obj, cpi_recoup_obj):
 
 
 
-PrintCurrentSettings(arpdau, cpi, roas, x, y)
+#PrintCurrentSettings(arpdau, cpi, roas, x, y)
 ltv_end_day_float = GetLTV(arpdau, end_day, x, y)
 ShowPlot(x, y, ltv_end_day_float, arpdau)
 standard_ltv_dict = GetStandardDayLTV(arpdau, x, y)
