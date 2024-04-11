@@ -227,7 +227,7 @@ def ShowPlot(x_num, y_num, ltv_num, arpdau_num):
     #Add the curve_fit data to the chart (data points from powerfunction)
     plt.plot(x_num, GetPowerY(x_num, y_num), "r-", label="fit: a=%5.3f, b=%5.3f" % tuple(GetParametersOfCurveFit(x_num, y_num)))
     # add title and subtitle to the plot
-    plt.title("LTV(Day "+ str(end_day)+"): " + str(ltv_num) + " " + currency)
+    #plt.title("LTV(Day "+ str(end_day)+"): " + str(ltv_num) + " " + currency)
     plt.suptitle("R-Squared: " + str(round(GetRSquared(x_num, y_num), 4)) + ", ARPDAU: " + str(round(arpdau_num, 4)) + " " + currency)
     plt.xlabel('x Days') #name the x axis of the plot
     plt.ylabel('y Retention %') #name the y axis of the plot
