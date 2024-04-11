@@ -259,7 +259,7 @@ def ShowLTVCPIPlot(ltv_num, cpi_num, ltv_dict_obj, cpi_recoup_obj):
 
 
 
-#PrintCurrentSettings(arpdau, cpi, roas, x, y)
+PrintCurrentSettings(arpdau, cpi, roas, x, y)
 ltv_end_day_float = GetLTV(arpdau, end_day, x, y)
 ShowPlot(x, y, ltv_end_day_float, arpdau)
 standard_ltv_dict = GetStandardDayLTV(arpdau, x, y)
