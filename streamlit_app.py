@@ -2,16 +2,14 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from datetime import date
-import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 
-st.title("📈 LTV Prediction v0.2")
+st.title("📈 LTV Prediction")
 
 st.markdown('''
-    **This dashboard will help you to figure out your users' Lifetime Value.**  
-    last update: 2024-04-11
+    **This dashboard will help you to figure out your users' Lifetime Value.**
     
     Just type in some numbers that you most likely got from your Google Play Store or Apple App Store.
     
@@ -73,6 +71,56 @@ with col2:
 st.header("Predicted Day in the future")
 end_day = st.number_input('Type in the end day for your prediction, e.g. 30, 60, 360', min_value = 0, max_value = 360, value = 90)
 
+
+# Read the CSV file into DataFrame
+url_retention = "https://raw.githubusercontent.com/svenjuergens84/ltv-prediction/main/final_retention_clean_row_grouped.csv"
+grouped_df = pd.read_csv(url_retention, usecols=['geo', 'day', 'genre_name', 'value'])
+grouped_df = grouped_df.rename(columns={'value': 'retention_value'})
+
+# Get unique genre and geo names
+genre_names = grouped_df['genre_name'].unique()
+geo_names = grouped_df['geo'].unique()
+
+url_arpdau = "https://raw.githubusercontent.com/svenjuergens84/ltv-prediction/main/final_arpdau_clean_row_grouped.csv"
+grouped_arpdau_df = pd.read_csv(url_arpdau, usecols=['metric', 'geo', 'genre_name', 'value'])
+grouped_arpdau_df = grouped_arpdau_df.rename(columns={'value': 'arpdau_value'})
+
+
+
+st.header("Game Retention Benchmarks")
+st.write("❤️ The benchmarks are shared by the awesome folks at https://gameanalytics.com")
+st.write("If you don't have a game, just leave it as default. This will not influence your LTV calculation")
+
+# Streamlit UI components for selecting genre and geo
+selected_genre = st.selectbox("Select your game genre:", genre_names)
+selected_geo = st.selectbox("Select your main geo:", geo_names)
+
+
+def filter_data(selected_genre, selected_geo):
+    filtered_data = grouped_df[(grouped_df['genre_name'] == selected_genre) & 
+                               (grouped_df['geo'] == selected_geo) & 
+                               (grouped_df['day'].isin([1, 7, 28]))]
+    return filtered_data.sort_values(by='day')
+
+# Call the filter function to get filtered DataFrame
+selected_data = filter_data(selected_genre, selected_geo)
+
+def filter_arpdau_data(selected_genre, selected_geo):
+    filtered_data = grouped_arpdau_df[(grouped_arpdau_df['genre_name'] == selected_genre) & 
+                               (grouped_arpdau_df['geo'] == selected_geo)]
+    return filtered_data
+
+selected_arpdau_data = filter_arpdau_data(selected_genre, selected_geo)
+
+benchmark_x = selected_data["day"]
+benchmark_y = selected_data["retention_value"]/100
+benchmark_arpdau = selected_arpdau_data[selected_arpdau_data['metric'] == 'arpdau']['arpdau_value'].values[0]
+
+
+# Display the filtered DataFrame
+st.write(selected_data)
+st.write(selected_arpdau_data)
+
 today = str(date.today()) #prepare the "today" variable with the US formatted date --> for writing it into the file name
 
 x = [1, 7, 30] #days, e.g. 1, 7, 14, 30
@@ -80,8 +128,8 @@ y = [float(day_1_retention)/100,
      float(day_7_retention)/100,
      float(day_30_retention)/100]
 
-
 currency = "$"
+
 
 def PrintCurrentSettings(arpdau, cpi, roas, x_values, y_values):
     print("CURRENT SETTINGS:")
@@ -194,7 +242,6 @@ def FindRecoupCPIDay(arpdau_value, cpi_value, roas_goal, end_day, x_values, y_va
     return day
             
 
-
 def GetParametersOfCurveFit(x_values, y_values):
     popt, pcov = curve_fit(PowerLawFunction,  x_values,  y_values)
     #How to use the return in other functions
@@ -221,18 +268,22 @@ def GetRSquared(x_num, y_num):
     return r_squared
 
 
-def ShowPlot(x_num, y_num, ltv_num, arpdau_num):
-    #Add the original data to the chart (data points of x and y)
-    plt.scatter(x_num, y_num, label='actual data')
-    #Add the curve_fit data to the chart (data points from powerfunction)
-    plt.plot(x_num, GetPowerY(x_num, y_num), "r-", label="fit: a=%5.3f, b=%5.3f" % tuple(GetParametersOfCurveFit(x_num, y_num)))
-    # add title and subtitle to the plot
-    #plt.title("LTV(Day "+ str(end_day)+"): " + str(ltv_num) + " " + currency)
-    plt.suptitle("R-Squared: " + str(round(GetRSquared(x_num, y_num), 4)) + ", ARPDAU: " + str(round(arpdau_num, 4)) + " " + currency)
-    plt.xlabel('x Days') #name the x axis of the plot
-    plt.ylabel('y Retention %') #name the y axis of the plot
-    plt.legend() #add a legend to the plot
-    #plt.show()
+def ShowPlot(user_input_x, user_input_y, benchmark_x, benchmark_y, ltv_num, arpdau_num):
+    # Add the original data to the chart (data points of x and y)
+    plt.scatter(user_input_x, user_input_y, label='User Input Data')
+    # Add the curve_fit data to the chart (data points from powerfunction)
+    plt.plot(user_input_x, GetPowerY(user_input_x, user_input_y), "r-", label="User Input Fit: a=%5.3f, b=%5.3f" % tuple(GetParametersOfCurveFit(user_input_x, user_input_y)))
+    
+    # Add benchmark data to the chart
+    plt.scatter(benchmark_x, benchmark_y, label='Benchmark Data')
+    plt.plot(benchmark_x, GetPowerY(benchmark_x, benchmark_y), "g-", label="Benchmark Fit: a=%5.3f, b=%5.3f" % tuple(GetParametersOfCurveFit(benchmark_x, benchmark_y)))
+    
+    # Add title and subtitle to the plot
+    plt.suptitle("Retention Plot")
+    plt.title("R-Squared (your input): " + str(round(GetRSquared(user_input_x, user_input_y), 4)))
+    plt.xlabel('x Days') # Name the x axis of the plot
+    plt.ylabel('y Retention %') # Name the y axis of the plot
+    plt.legend() # Add a legend to the plot
     st.pyplot(plt)
 
 
@@ -249,8 +300,8 @@ def ShowLTVCPIPlot(ltv_num, cpi_num, ltv_dict_obj, cpi_recoup_obj):
                      arrowprops=dict(facecolor='black', arrowstyle='->'),
                      fontsize=8)
     
-    plt.title("LTV(Day "+ str(end_day)+"): " + str(ltv_num) + " " + currency)
-    plt.suptitle("CPI: " + str(round(cpi_num, 4)) + " " + currency + " - " + "Breakeven Day (ROAS): " + str(round(cpi_recoup_obj, 4)))
+    plt.suptitle("LTV Plot (your input): LTV(Day "+ str(end_day)+"): " + str(ltv_num) + " " + currency)
+    plt.title("CPI: " + str(round(cpi_num, 4)) + " " + currency + " - " + "Breakeven Day (ROAS Goal): " + str(round(cpi_recoup_obj, 4)))
     plt.xlabel('x Days') #name the x axis of the plot
     plt.ylabel('y USD') #name the y axis of the plot
     plt.legend() #add a legend to the plot
@@ -258,13 +309,11 @@ def ShowLTVCPIPlot(ltv_num, cpi_num, ltv_dict_obj, cpi_recoup_obj):
 
 
 
-
-PrintCurrentSettings(arpdau, cpi, roas, x, y)
-ltv_end_day_float = GetLTV(arpdau, end_day, x, y)
-ShowPlot(x, y, ltv_end_day_float, arpdau)
-standard_ltv_dict = GetStandardDayLTV(arpdau, x, y)
-detailed_ltv_dict = GetDetailedDayLTV(arpdau, x, y, end_day)
-lifetime_days_float = GetLifetimeDays(end_day, x, y)
+ltv_end_day_float = GetLTV(arpdau, end_day, x, y) #user ltv
+ShowPlot(x, y,benchmark_x,benchmark_y, ltv_end_day_float, arpdau)
+detailed_ltv_dict = GetDetailedDayLTV(arpdau, x, y, end_day) #LTV dict user
 cpi_recoup_day = FindRecoupCPIDay(arpdau, cpi, roas, end_day, x, y)
 ShowLTVCPIPlot(ltv_end_day_float, cpi, detailed_ltv_dict, cpi_recoup_day)
+
+
 
