@@ -11,7 +11,7 @@ st.title("📈 LTV Prediction")
 st.markdown('''
     **This dashboard will help you to figure out your users' Lifetime Value.**
 
-    Last Update: 2024-05-09
+    Last Update: 2025-04-09
     
     Just type in some numbers that you most likely got from your Google Play Store or Apple App Store.
     
