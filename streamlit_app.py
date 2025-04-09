@@ -27,6 +27,8 @@ st.markdown('''
     - let me know if you have found a bug or have some feature requests ;)
     
     Made by Sven Jürgens
+    ✨ I help apps increase their ROAS in 90 days
+    DM me and say hi 👇
     
     https://www.linkedin.com/in/svenjuergens/  
     http://svenjuergens-consulting.com/
